@@ -1,0 +1,26 @@
+map $http_origin $cors_header {
+    default "";
+    "~^https?://(example\.dev|(.+)\.example\.org|localhost:1234)" "$http_origin";
+}
+
+server {
+  listen    80;
+  server_name www.example.com;
+
+  error_log  /var/log/nginx/www.example.com-error.log;
+  access_log  /var/log/nginx/www.example.com-access.log;
+
+set $proxy_pass_example http://proxy_pass_exmaple.com:1234;
+
+location / {
+        more_clear_headers     Access-Control-Allow-Origin;
+        more_clear_headers     Access-Control-Allow-Methods;
+        more_clear_headers     Access-Control-Allow-Headers;
+        add_header Access-Control-Allow-Origin "$cors_header";
+        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS, HEAD";
+        add_header Access-Control-Allow-Headers 'Authorization,DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+
+        proxy_pass $proxy_pass_example$request_uri;
+
+  }
+}
